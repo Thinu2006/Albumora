@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* Common BTN */
+  .btn {
+    @apply w-full py-3.5 bg-gray-600 text-white font-medium rounded-3xl hover:bg-gray-500 transition;
+  }
+
+  /* Common Input */
+  .input-field {
+    @apply w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-gray-800 focus:outline-none;
+  }
+
+  /* Common Container*/
+  .form-container {
+    @apply space-y-4;
+  }
+
+  /* Panel*/
+  .panel-left {
+    @apply relative flex flex-col items-center justify-end p-8 bg-cover bg-center h-full rounded-l-3xl;
+  }
+
+  .panel-right {
+    @apply bg-gray-300 p-8 h-full flex flex-col rounded-r-3xl justify-center space-x-4;
+  }
+
+  /* Form Heading */
+  .form-heading {
+    @apply text-3xl font-bold mb-10 text-gray-800 text-center;
+  }
+  
+  /* Responsive*/
+  @screen md {
+    .panel-left {
+      @apply w-1/2 flex;
+    }
+    .panel-right {
+      @apply w-1/2 ;
+    }
+    .btn{
+      @apply w-full;
+    }
+  }
+
+  @screen sm {
+    .panel-left {
+      @apply hidden;
+    }
+    .panel-right {
+      @apply w-full ;
+    }
+    .btn{
+      @apply w-full px-2 py-2;
+    }
+  }
+  
+  /* Card Style */
+  .album-card {
+    @apply bg-white rounded-xl shadow-md flex flex-col items-center p-4 text-center;
+  }
+
+  .album-title {
+      @apply text-xl font-bold mt-4;
+  }
+
+  .album-artist {
+      @apply text-lg text-gray-600;
+  }
+
+  .album-img {
+      @apply h-40 object-contain;
+  }
+
+  .section-title {
+      @apply text-3xl sm:text-4xl font-bold text-center mb-10 font-rowdies;
+  }
+
+  .section-container {
+      @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4 sm:p-10;
+  }
+}
