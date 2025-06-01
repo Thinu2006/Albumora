@@ -1,6 +1,13 @@
 <x-app-layout>
     <div class="py-8 sm:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Add token handling similar to albums page -->
+            @if(session('token'))
+                <script>
+                    localStorage.setItem('auth_token', '{{ session('token') }}');
+                </script>
+            @endif
+
             <!-- Page Header -->
             <div class="text-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-[#e2e8f0]">
                 <h1 class="text-2xl md:text-3xl font-bold text-[#1e293b] flex items-center justify-center">
@@ -71,215 +78,276 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            loadReviews();
+            // Get token from localStorage or cookie
+            let rawToken = localStorage.getItem('auth_token');
             
-            // Form submission handler
-            document.getElementById('reviewForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitReview();
-            });
+            if (!rawToken) {
+                // Fallback to cookie if not in localStorage
+                rawToken = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('auth_token='))
+                    ?.split('=')[1];
+                
+                if (rawToken) {
+                    localStorage.setItem('auth_token', rawToken);
+                }
+            }
 
-            // Cancel edit handler
-            document.getElementById('cancelEdit').addEventListener('click', resetForm);
-        });
-
-        let editingReviewId = null;
-
-        function loadReviews() {
-            axios.get('/api/reviews')
-                .then(response => {
-                    const reviewsData = response.data.data || response.data;
-                    if (reviewsData?.length >= 0) {
-                        displayReviews(response.data);
-                    } else {
-                        throw new Error('Invalid response format');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading reviews:', error);
-                    const errorMsg = error.response?.data?.message || error.message || 'Error loading reviews';
-                    document.getElementById('loadingMyReviews').innerHTML = `
-                        <div class="bg-[#fee2e2] border-l-4 border-[#ef4444] p-4">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <i class='bx bx-error text-[#ef4444]'></i>
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-sm text-[#991b1b]">${errorMsg}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-        }
-
-        function submitReview() {
-            const reviewText = document.getElementById('reviewText').value;
-            const userId = {{ Auth::id() }};
-            const url = editingReviewId ? `/api/reviews/${editingReviewId}` : '/api/reviews';
-            const method = editingReviewId ? 'put' : 'post';
-
-            axios[method](url, {
-                text: reviewText,
-                customer_id: userId
-            }, {
+            if (!rawToken) {
+                console.error('No auth token found');
+                return;
+            }
+            
+            const token = rawToken.startsWith('Bearer ') ? rawToken : `Bearer ${rawToken}`;
+            
+            // Define apiHeaders with the token
+            const apiHeaders = {
                 headers: {
+                    'Authorization': token,
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 }
-            })
-            .then(() => {
-                resetForm();
-                loadReviews();
-                showAlert(editingReviewId ? 'Review updated!' : 'Review submitted!');
-            })
-            .catch(error => {
-                console.error('Error submitting review:', error);
-                showAlert('Error: ' + (error.response?.data?.message || 'Please try again.'), 'error');
-            });
-        }
+            };
 
-        function displayReviews(reviews) {
-            const userId = {{ Auth::id() ?? 'null' }};
-            const reviewsArray = reviews.data || reviews;
-            
-            // Separate reviews
-            const [myReviews, otherReviews] = reviewsArray.reduce(([mine, others], review) => {
-                const isOwner = userId && (review.customer_id == userId || (review.customer && review.customer.id == userId));
-                return isOwner ? [[...mine, review], others] : [mine, [...others, review]];
-            }, [[], []]);
-            
-            // Display reviews
-            displayReviewSection('myReviewsContainer', myReviews, true);
-            displayReviewSection('otherReviewsContainer', otherReviews, false);
-        }
+            // Verify token is valid
+            axios.get('/api/user', apiHeaders)
+                .then(response => {
+                    console.log('Token is valid', response);
+                    // Initialize the reviews page after token validation
+                    initializeReviews(apiHeaders);
+                })
+                .catch(error => {
+                    console.error('Token validation failed', error);
+                });
 
-        function displayReviewSection(containerId, reviews, isOwner) {
-            const container = document.getElementById(containerId);
-            
-            if (reviews.length > 0) {
-                container.innerHTML = reviews.map(review => createReviewCard(review, isOwner)).join('');
-            } else {
-                container.innerHTML = `
-                    <div class="text-center py-8 rounded-lg bg-[#f8fafc] border border-dashed border-[#e2e8f0]">
-                        <i class='bx bx-message-rounded-minus text-4xl text-[#cbd5e1] mb-3'></i>
-                        <p class="text-[#64748b]">${isOwner ? "You haven't written any reviews yet." : "No reviews from the community yet."}</p>
+            function initializeReviews(apiHeaders) {
+                loadReviews(apiHeaders);
+                
+                // Form submission handler
+                document.getElementById('reviewForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    submitReview(apiHeaders);
+                });
+
+                // Cancel edit handler
+                document.getElementById('cancelEdit').addEventListener('click', resetForm);
+            }
+
+            let editingReviewId = null;
+
+            function loadReviews(apiHeaders) {
+                axios.get('/api/reviews', apiHeaders)
+                    .then(response => {
+                        const reviewsData = response.data.data || response.data;
+                        if (reviewsData?.length >= 0) {
+                            displayReviews(response.data);
+                        } else {
+                            throw new Error('Invalid response format');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading reviews:', error);
+                        const errorMsg = error.response?.data?.message || error.message || 'Error loading reviews';
+                        
+                        if (error.response?.status === 401) {
+                            return;
+                        }
+                        
+                        document.getElementById('loadingMyReviews').innerHTML = `
+                            <div class="bg-[#fee2e2] border-l-4 border-[#ef4444] p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class='bx bx-error text-[#ef4444]'></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-[#991b1b]">${errorMsg}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+            }
+
+            function submitReview(apiHeaders) {
+                const reviewText = document.getElementById('reviewText').value;
+                const userId = {{ Auth::id() }};
+                const url = editingReviewId ? `/api/reviews/${editingReviewId}` : '/api/reviews';
+                const method = editingReviewId ? 'put' : 'post';
+
+                if (!reviewText.trim()) {
+                    showAlert('Please enter your review text', 'error');
+                    return;
+                }
+
+                axios[method](url, {
+                    text: reviewText,
+                    customer_id: userId
+                }, apiHeaders)
+                .then(() => {
+                    resetForm();
+                    loadReviews(apiHeaders);
+                    showAlert(editingReviewId ? 'Review updated!' : 'Review submitted!');
+                })
+                .catch(error => {
+                    console.error('Error submitting review:', error);
+                    let errorMsg = error.response?.data?.message || 'Please try again.';
+                    
+                    if (error.response?.status === 401) {
+                        errorMsg = 'Your session has expired. Please login again.';
+                        return;
+                    }
+                    
+                    showAlert('Error: ' + errorMsg, 'error');
+                });
+            }
+
+            function displayReviews(reviews) {
+                const userId = {{ Auth::id() ?? 'null' }};
+                const reviewsArray = reviews.data || reviews;
+                
+                // Separate reviews
+                const [myReviews, otherReviews] = reviewsArray.reduce(([mine, others], review) => {
+                    const isOwner = userId && (review.customer_id == userId || (review.customer && review.customer.id == userId));
+                    return isOwner ? [[...mine, review], others] : [mine, [...others, review]];
+                }, [[], []]);
+                
+                // Display reviews
+                displayReviewSection('myReviewsContainer', myReviews, true);
+                displayReviewSection('otherReviewsContainer', otherReviews, false);
+            }
+
+            function displayReviewSection(containerId, reviews, isOwner) {
+                const container = document.getElementById(containerId);
+                
+                if (reviews.length > 0) {
+                    container.innerHTML = reviews.map(review => createReviewCard(review, isOwner)).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-8 rounded-lg bg-[#f8fafc] border border-dashed border-[#e2e8f0]">
+                            <i class='bx bx-message-rounded-minus text-4xl text-[#cbd5e1] mb-3'></i>
+                            <p class="text-[#64748b]">${isOwner ? "You haven't written any reviews yet." : "No reviews from the community yet."}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            function createReviewCard(review, isOwner) {
+                const createdAt = new Date(review.created_at).toLocaleDateString('en-US', { 
+                    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                
+                const customerName = review.customer?.name || 'Anonymous';
+                const initials = customerName.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+                
+                return `
+                    <div class="p-5 rounded-xl ${isOwner ? 'bg-[#eef2ff] border-l-4 border-[#6366f1]' : 'bg-white border-l-4 border-[#e2e8f0]'} shadow-sm hover:shadow-md transition-all">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full ${isOwner ? 'bg-[#6366f1] text-white' : 'bg-[#f1f5f9] text-[#1e293b]'} font-medium">
+                                    ${initials}
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-[#1e293b]">${customerName}</h3>
+                                    <p class="text-xs text-[#64748b]">${createdAt}</p>
+                                </div>
+                            </div>
+                            ${isOwner ? `
+                            <div class="flex space-x-2">
+                                <button onclick="editReview('${review.id}')" class="p-1.5 text-[#6366f1] hover:text-[#4f46e5] hover:bg-[#e0e7ff] rounded-full transition-colors" title="Edit">
+                                    <i class='bx bx-edit-alt'></i>
+                                </button>
+                                <button onclick="deleteReview('${review.id}')" class="p-1.5 text-[#ef4444] hover:text-[#dc2626] hover:bg-[#fee2e2] rounded-full transition-colors" title="Delete">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </div>
+                            ` : ''}
+                        </div>
+                        <p class="text-[#1e293b] mt-2 pl-13">${review.text}</p>
                     </div>
                 `;
             }
-        }
 
-        function createReviewCard(review, isOwner) {
-            const createdAt = new Date(review.created_at).toLocaleDateString('en-US', { 
-                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-            });
-            
-            const customerName = review.customer?.name || 'Anonymous';
-            const initials = customerName.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
-            
-            return `
-                <div class="p-5 rounded-xl ${isOwner ? 'bg-[#eef2ff] border-l-4 border-[#6366f1]' : 'bg-white border-l-4 border-[#e2e8f0]'} shadow-sm hover:shadow-md transition-all">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex items-center space-x-3">
-                            <div class="flex items-center justify-center w-10 h-10 rounded-full ${isOwner ? 'bg-[#6366f1] text-white' : 'bg-[#f1f5f9] text-[#1e293b]'} font-medium">
-                                ${initials}
-                            </div>
-                            <div>
-                                <h3 class="font-medium text-[#1e293b]">${customerName}</h3>
-                                <p class="text-xs text-[#64748b]">${createdAt}</p>
-                            </div>
-                        </div>
-                        ${isOwner ? `
-                        <div class="flex space-x-2">
-                            <button onclick="editReview('${review.id}')" class="p-1.5 text-[#6366f1] hover:text-[#4f46e5] hover:bg-[#e0e7ff] rounded-full transition-colors" title="Edit">
-                                <i class='bx bx-edit-alt'></i>
-                            </button>
-                            <button onclick="deleteReview('${review.id}')" class="p-1.5 text-[#ef4444] hover:text-[#dc2626] hover:bg-[#fee2e2] rounded-full transition-colors" title="Delete">
-                                <i class='bx bx-trash'></i>
-                            </button>
-                        </div>
-                        ` : ''}
-                    </div>
-                    <p class="text-[#1e293b] mt-2 pl-13">${review.text}</p>
-                </div>
-            `;
-        }
+            function editReview(reviewId) {
+                axios.get(`/api/reviews/${reviewId}`, apiHeaders)
+                    .then(response => {
+                        const reviewText = response.data.data?.text || response.data.text;
+                        if (!reviewText) throw new Error('Review text not found');
+                        
+                        document.getElementById('reviewText').value = reviewText;
+                        document.getElementById('reviewId').value = reviewId;
+                        editingReviewId = reviewId;
+                        
+                        // Update UI for editing
+                        document.getElementById('formTitle').innerHTML = `<i class='bx bx-edit-alt text-[#6366f1] mr-2'></i> Edit Your Review`;
+                        document.querySelector('#reviewForm button[type="submit"]').innerHTML = `<i class='bx bx-save mr-2'></i> Update Review`;
+                        document.getElementById('cancelEdit').classList.remove('hidden');
+                        
+                        // Scroll to form
+                        document.getElementById('reviewText').focus();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching review:', error);
+                        showAlert('Error loading review: ' + (error.response?.data?.message || error.message), 'error');
+                    });
+            }
 
-        function editReview(reviewId) {
-            axios.get(`/api/reviews/${reviewId}`)
-                .then(response => {
-                    const reviewText = response.data.data?.text || response.data.text;
-                    if (!reviewText) throw new Error('Review text not found');
-                    
-                    document.getElementById('reviewText').value = reviewText;
-                    document.getElementById('reviewId').value = reviewId;
-                    editingReviewId = reviewId;
-                    
-                    // Update UI for editing
-                    document.getElementById('formTitle').innerHTML = `<i class='bx bx-edit-alt text-[#6366f1] mr-2'></i> Edit Your Review`;
-                    document.querySelector('#reviewForm button[type="submit"]').innerHTML = `<i class='bx bx-save mr-2'></i> Update Review`;
-                    document.getElementById('cancelEdit').classList.remove('hidden');
-                    
-                    // Scroll to form
-                    document.getElementById('reviewText').focus();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+            function deleteReview(reviewId) {
+                if (!confirm('Delete this review permanently?')) return;
+                
+                axios.delete(`/api/reviews/${reviewId}`, apiHeaders)
+                .then(() => {
+                    showAlert('Review deleted');
+                    loadReviews(apiHeaders);
                 })
                 .catch(error => {
-                    console.error('Error fetching review:', error);
-                    showAlert('Error loading review: ' + error.message, 'error');
+                    console.error('Error deleting review:', error);
+                    let errorMsg = error.response?.data?.message || 'Error deleting review';
+                    
+                    if (error.response?.status === 401) {
+                        errorMsg = 'Your session has expired. Please login again.';
+                        return;
+                    }
+                    
+                    showAlert(errorMsg, 'error');
                 });
-        }
+            }
 
-        function deleteReview(reviewId) {
-            if (!confirm('Delete this review permanently?')) return;
-            
-            axios.delete(`/api/reviews/${reviewId}`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            })
-            .then(() => {
-                showAlert('Review deleted');
-                loadReviews();
-            })
-            .catch(error => {
-                console.error('Error deleting review:', error);
-                showAlert('Error deleting review', 'error');
-            });
-        }
+            function resetForm() {
+                document.getElementById('reviewForm').reset();
+                document.getElementById('reviewId').value = '';
+                editingReviewId = null;
+                document.getElementById('formTitle').innerHTML = `<i class='bx bx-edit-alt text-[#6366f1] mr-2'></i> Write a Review`;
+                document.querySelector('#reviewForm button[type="submit"]').innerHTML = `<i class='bx bx-send mr-2'></i> Submit Review`;
+                document.getElementById('cancelEdit').classList.add('hidden');
+            }
 
-        function resetForm() {
-            document.getElementById('reviewForm').reset();
-            document.getElementById('reviewId').value = '';
-            editingReviewId = null;
-            document.getElementById('formTitle').innerHTML = `<i class='bx bx-edit-alt text-[#6366f1] mr-2'></i> Write a Review`;
-            document.querySelector('#reviewForm button[type="submit"]').innerHTML = `<i class='bx bx-send mr-2'></i> Submit Review`;
-            document.getElementById('cancelEdit').classList.add('hidden');
-        }
-
-        function showAlert(message, type = 'success') {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `fixed bottom-4 right-4 max-w-sm p-4 rounded-lg shadow-lg ${
-                type === 'success' ? 'bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0]' : 'bg-[#fee2e2] text-[#991b1b] border border-[#fecaca]'
-            }`;
-            alertDiv.innerHTML = `
-                <div class="flex items-start">
-                    <i class='bx ${type === 'success' ? 'bx-check-circle text-[#10b981]' : 'bx-error text-[#ef4444]'} mr-2 mt-0.5 text-xl'></i>
-                    <div>
-                        <p class="font-medium">${message}</p>
+            function showAlert(message, type = 'success') {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `fixed bottom-4 right-4 max-w-sm p-4 rounded-lg shadow-lg ${
+                    type === 'success' ? 'bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0]' : 'bg-[#fee2e2] text-[#991b1b] border border-[#fecaca]'
+                }`;
+                alertDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <i class='bx ${type === 'success' ? 'bx-check-circle text-[#10b981]' : 'bx-error text-[#ef4444]'} mr-2 mt-0.5 text-xl'></i>
+                        <div>
+                            <p class="font-medium">${message}</p>
+                        </div>
                     </div>
-                </div>
-            `;
-            
-            document.body.appendChild(alertDiv);
-            setTimeout(() => {
-                alertDiv.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-                setTimeout(() => alertDiv.remove(), 300);
-            }, 3000);
-        }
+                `;
+                
+                document.body.appendChild(alertDiv);
+                setTimeout(() => {
+                    alertDiv.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                    setTimeout(() => alertDiv.remove(), 300);
+                }, 3000);
+            }
+
+            // Make functions available globally
+            window.editReview = editReview;
+            window.deleteReview = deleteReview;
+        });
     </script>
     @endpush
 </x-app-layout>

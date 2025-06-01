@@ -12,36 +12,28 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\AdminLoginController;
 
-// Public routes (no auth required)
+// Public routes 
+
 Route::post('/login', [AuthController::class, 'login']); // Regular user login
-Route::post('/admin/login', [AdminLoginController::class, 'apiLogin']); // Admin API login
+Route::post('/admin/login', [AdminLoginController::class, 'apiLogin']); // Admin login
 
 // Authenticated routes (both admin and regular users)
 Route::middleware('auth:sanctum')->group(function() {
     // Common logout endpoint
     Route::post('/logout', [AuthController::class, 'logout']);
-    
-    // Admin-only routes
+
     Route::apiResource('albums', AlbumController::class);
     Route::apiResource('genres', GenreController::class)->only(['index']);
     Route::apiResource('users', UserController::class)->only(['index', 'destroy']);
-    Route::apiResource('orders', OrderController::class)->only(['index', 'show', 'update']);
+    Route::apiResource('orders', OrderController::class)->only(['index', 'store','show', 'update']);
+
+    Route::apiResource('reviews', ReviewController::class);
     
-    // Regular user routes
-    
-    
+
     // Get current user
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
 });
-
-
-Route::get('albums', [AlbumController::class, 'index']);
-    Route::apiResource('genres', GenreController::class)->only(['index']);
-    Route::apiResource('orders', OrderController::class)->except(['destroy']);
-    Route::apiResource('payments', PaymentController::class)->only(['index', 'store', 'show']);
-    Route::apiResource('shipments', ShipmentController::class)->only(['index', 'store', 'show']);
-    Route::apiResource('reviews', ReviewController::class);
-
-
+   
+    

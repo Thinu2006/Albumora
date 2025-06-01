@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminLoginController extends Controller
 {
-    // Web Login Methods
     public function create()
     {
         return view('auth.admin-login');
@@ -26,7 +25,6 @@ class AdminLoginController extends Controller
             if ($user->user_type === 'admin') {
                 $token = $user->createToken('admin-token')->plainTextToken;
                 
-                // Store in session for Blade template
                 session(['auth_token' => $token]);
                 
                 return redirect()->route('admin.dashboard')
@@ -41,7 +39,7 @@ class AdminLoginController extends Controller
         return back()->withErrors(['email' => 'Invalid credentials.']);
     }
 
-    // API Login Method
+
     public function apiLogin(Request $request)
     {
         $request->validate([
