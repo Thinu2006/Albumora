@@ -35,11 +35,7 @@
                                class="w-full px-4 py-3 rounded-lg border-gray-300 focus:border-gray-500 focus:ring focus:ring-gray-200" required>
                     </div>
 
-                    <div class="flex items-center justify-between">
-                        <label for="remember_me" class="flex items-center">
-                            <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-gray-600 shadow-sm focus:ring-gray-500" name="remember">
-                            <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-                        </label>
+                    <div class="flex items-center justify-end">
 
                         @if (Route::has('password.request'))
                             <a class="text-sm text-gray-600 hover:text-gray-900" href="{{ route('password.request') }}">

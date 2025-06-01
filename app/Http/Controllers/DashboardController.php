@@ -12,6 +12,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Get 3 New Releaseed Albums from MySQL
         $newReleases = Album::with(['genres', 'creator'])
             ->orderBy('release_year', 'desc')
             ->take(3)
@@ -23,14 +24,11 @@ class DashboardController extends Controller
                 return $album;
             });
             
-        $recentReviews = Review::with(['customer'])
-            ->latest()
+        // Get 3 most recent reviews from MongoDB
+        $recentReviews = Review::orderBy('created_at', 'desc')
             ->take(3)
             ->get();
-            
-        return view('dashboard', [
-            'newReleases' => $newReleases,
-            'recentReviews' => $recentReviews
-        ]);
+
+        return view('dashboard', compact('newReleases', 'recentReviews'));
     }
 }

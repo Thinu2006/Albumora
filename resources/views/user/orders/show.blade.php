@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="py-8 sm:py-12 bg-[#f8fafc]">
+    <div class="py-8 sm:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header Section -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-[#e2e8f0]">
@@ -205,22 +205,22 @@
                         </div>
                         
                         <!-- Order Total -->
-                        <div class="p-6 bg-[#f8fafc] border-t border-[#e2e8f0]">
+                        <!-- <div class="p-6 bg-[#f8fafc] border-t border-[#e2e8f0]">
                             <div class="space-y-3 max-w-md ml-auto">
                                 <div class="flex justify-between">
                                     <span class="text-[#64748b]">Subtotal</span>
-                                    <span class="font-medium text-[#1e293b]">${{ number_format($order->total_amount, 2) }}</span>
+                                    <span class="font-medium text-[#1e293b]">${{ number_format($order->subtotal ?? $order->total_amount, 2) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-[#64748b]">Shipping</span>
-                                    <span class="font-medium text-[#1e293b]">$5.00</span>
+                                    <span class="font-medium text-[#1e293b]">${{ number_format($order->shipping_cost ?? 5.00, 2) }}</span>
                                 </div>
                                 <div class="flex justify-between pt-3 border-t border-[#e2e8f0]">
                                     <span class="font-bold text-[#1e293b]">Total</span>
-                                    <span class="font-bold text-[#6366f1]">${{ number_format($order->total_amount + 5, 2) }}</span>
+                                    <span class="font-bold text-[#6366f1]">${{ number_format($order->total_amount, 2) }}</span>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 
@@ -254,7 +254,7 @@
                             </div>
                             <div>
                                 <h3 class="text-sm font-medium text-[#64748b]">Total Amount</h3>
-                                <p class="text-2xl font-bold text-[#6366f1]">${{ number_format($order->total_amount + 5, 2) }}</p>
+                                <p class="text-2xl font-bold text-[#6366f1]">${{ number_format($order->total_amount, 2) }}</p>
                             </div>
                         </div>
                     </div>

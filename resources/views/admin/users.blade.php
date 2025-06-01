@@ -63,7 +63,6 @@
 
             if (!rawToken) {
                 console.error('No auth token found');
-                window.location.href = '/admin/login';
                 return;
             }
             
@@ -88,7 +87,6 @@
                 })
                 .catch(error => {
                     console.error('Token validation failed', error);
-                    window.location.href = '/admin/login';
                 });
 
             function initializeUserManagement() {

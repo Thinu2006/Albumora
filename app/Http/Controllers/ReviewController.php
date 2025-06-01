@@ -12,7 +12,16 @@ class ReviewController extends Controller
     public function index(Request $request)
     {
         try {
-            $reviews = Review::with('customer')->latest()->paginate(10);
+            // Get reviews with manual customer loading
+            $reviews = Review::latest()->paginate(10);
+            
+            // Manually load customers
+           $reviews->getCollection()->transform(function ($review) {
+                $review->customer = $review->customer; // will call the accessor
+                return $review;
+            });
+
+            
             return ReviewResource::collection($reviews);
         } catch (\Exception $e) {
             \Log::error('Error fetching reviews: ' . $e->getMessage());
@@ -37,23 +46,20 @@ class ReviewController extends Controller
 
         return response()->json([
             'message' => 'Review submitted successfully',
-            'data' => new ReviewResource($review->load('customer'))
+            'data' => new ReviewResource($review)
         ]);
     }
 
     public function show(string $id)
     {
-        $review = Review::with('customer')->findOrFail($id);
+        $review = Review::findOrFail($id);
         return new ReviewResource($review);
     }
 
     public function update(Request $request, string $id)
     {
-        $review = Review::findOrFail($id);
+        $review = Review::findOrFail($id); // Removed ->with('customer')
         
-        // Add authorization check (optional but recommended)
-        
-
         $validated = $request->validate([
             'text' => 'required|string|max:1000'
         ]);
@@ -62,9 +68,10 @@ class ReviewController extends Controller
 
         return response()->json([
             'message' => 'Review updated successfully',
-            'data' => new ReviewResource($review->load('customer'))
+            'data' => new ReviewResource($review)
         ]);
     }
+
 
     public function destroy(string $id)
     {

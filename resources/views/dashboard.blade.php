@@ -55,24 +55,27 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-16 p-10">
                     @foreach($recentReviews as $review)
-                    <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 p-6">
-                        <div class="mb-4 border-b border-[#E5E7EB] pb-3">
-                            <h4 class="text-lg font-semibold text-[#1F2937]">{{ $review->customer->name }}</h4>
-                            <p class="text-sm text-[#6B7280] mb-2">{{ $review->created_at->format('M d, Y') }}</p>
-                            <div class="flex mb-2">
-                                @for($i = 0; $i < 5; $i++)
-                                    <i class='bx bxs-star text-[#F59E0B]'></i>
-                                @endfor
+                        <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 p-6">
+                            <div class="mb-4 border-b border-[#E5E7EB] pb-3">
+                                @php $customer = \App\Models\User::find($review->customer_id); @endphp
+                                <h4 class="text-lg font-semibold text-[#1F2937]">{{ $customer?->name ?? 'Unknown' }}</h4>
+
+                                <p class="text-sm text-[#6B7280] mb-2">{{ $review->created_at->format('M d, Y') }}</p>
+                                <div class="flex mb-2">
+                                    @for($i = 0; $i < 5; $i++)
+                                        <i class='bx bxs-star text-[#F59E0B]'></i>
+                                    @endfor
+                                </div>
+                            </div>
+                            <div class="text-[#4B5563] mb-4">
+                                <p class="italic">"{{ $review->text }}"</p>
+                            </div>
+                            <div class="flex justify-end">
+                                <span class="text-xs text-[#6366F1] bg-[#EEF2FF] px-2 py-1 rounded-full">Verified Purchase</span>
                             </div>
                         </div>
-                        <div class="text-[#4B5563] mb-4">
-                            <p class="italic">"{{ $review->text }}"</p>
-                        </div>
-                        <div class="flex justify-end">
-                            <span class="text-xs text-[#6366F1] bg-[#EEF2FF] px-2 py-1 rounded-full">Verified Purchase</span>
-                        </div>
-                    </div>
                     @endforeach
+
                 </div>
                 
                 <div class="mt-2 text-center">

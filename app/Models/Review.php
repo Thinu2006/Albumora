@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use MongoDB\Laravel\Eloquent\Model as Eloquent;
 
-class Review extends Model
+class Review extends Eloquent
 {
-    use HasFactory;
-
+    protected $connection = 'mongodb';
     protected $fillable = ['text', 'customer_id'];
 
-    // Define the inverse of the relationship in User model
-    public function customer()
+    // Use an accessor instead of relationship
+    public function getCustomerAttribute()
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        if (!isset($this->attributes['customer'])) {
+            $this->attributes['customer'] = \App\Models\User::find($this->customer_id);
+        }
+        return $this->attributes['customer'];
     }
 }

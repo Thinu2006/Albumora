@@ -11,31 +11,6 @@ use App\Models\User;
 
 class CustomerRouteController extends Controller
 {
-    // In App\Http\Controllers\CustomerRouteController
-public function dashboard()
-{
-    if (Auth::check() && Auth::user()->user_type === 'user') {
-        // Get new releases (albums from the last 30 days)
-        $newReleases = Album::with(['genres', 'creator'])
-            ->where('created_at', '>=', now()->subDays(30))
-            ->latest()
-            ->take(6)
-            ->get();
-
-        // Get editor's picks (you can customize this logic)
-        $editorsPicks = Album::with(['genres', 'creator'])
-            ->inRandomOrder() // Or use some other selection criteria
-            ->take(2)
-            ->get();
-
-        return view('dashboard', [
-            'newReleases' => $newReleases,
-            'editorsPicks' => $editorsPicks
-        ]);
-    }
-
-    abort(403, 'Unauthorized access');
-}
 
     //Display the album search page for users.
     public function albumsearch()

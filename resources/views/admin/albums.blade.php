@@ -143,7 +143,6 @@
 
             if (!rawToken) {
                 console.error('No auth token found');
-                window.location.href = '/admin/login';
                 return;
             }
             

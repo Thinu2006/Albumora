@@ -53,24 +53,6 @@
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-
-                    <div class="flex items-center justify-between pt-2"> 
-                        <!-- Remember Me -->
-                        <div class="block">
-                            <label for="remember_me" class="inline-flex items-center">
-                                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" name="remember">
-                                <span class="ml-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-                            </label>
-                        </div>
-
-                        <!-- Forgot Password -->
-                        @if (Route::has('admin.password.request'))
-                            <a class="text-sm text-gray-600 hover:text-gray-900 underline" href="{{ route('admin.password.request') }}">
-                                {{ __('Forgot password?') }}
-                            </a>
-                        @endif
-                    </div>
-
                     <div class="pt-4"> 
                         <x-button class="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-lg transition duration-200 flex justify-center items-center">
                             {{ __('Login') }}

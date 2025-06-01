@@ -113,8 +113,8 @@ return [
         ],
         'mongodb' => [
             'driver'   => 'mongodb',
-            'dsn'      => env('MONGODB_URI','mongodb+srv://thinudifernando:M6qaL4r7vnIuzpPq@cluster0.ivueera.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'),
-            'database' => env('MONGODB_DATABASE','laravelalbummanagment'),  
+            'dsn'      => env('DB_URI','mongodb+srv://thinudifernando:Thinu200658@cluster0.lfzqhfy.mongodb.net/'),
+            'database' => 'albummanagment',  
         ],
     ],
 

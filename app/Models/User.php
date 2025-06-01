@@ -9,6 +9,11 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Album;
+use App\Models\Order;
+use App\Models\Review;
+
 
 class User extends Authenticatable
 {
@@ -70,12 +75,32 @@ class User extends Authenticatable
     {
         return $this->hasMany(Album::class, 'created_by');
     }
+
     public function orders()
     {
         return $this->hasMany(Order::class, 'customer_id');
     }
+
     public function reviews()
-{
-    return $this->hasMany(Review::class, 'customer_id');
-}
+    {
+        // Return a new query instance instead of executing it immediately
+        return new class($this->id) {
+            protected $userId;
+            
+            public function __construct($userId)
+            {
+                $this->userId = $userId;
+            }
+            
+            public function get()
+            {
+                return \App\Models\Review::where('customer_id', $this->userId)->get();
+            }
+            
+            public function paginate($perPage = 15)
+            {
+                return \App\Models\Review::where('customer_id', $this->userId)->paginate($perPage);
+            }
+        };
+    }
 }

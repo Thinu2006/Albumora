@@ -22,27 +22,27 @@
                 <!-- Other nav links remain the same -->
 
                 <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" 
-                    class="text-white hover:text-[#D1D5DB] font-medium text-sm uppercase tracking-wider transition-colors duration-200">
+                    class="text-white hover:text-[#c7ccd5] font-medium text-sm uppercase tracking-wider transition-colors duration-200">
                     {{ __('Home') }}
                 </x-nav-link>
                 <x-nav-link href="{{ route('user.album-search') }}" :active="request()->routeIs('user.album-search')" 
-                    class="text-white hover:text-[#D1D5DB] font-medium text-sm uppercase tracking-wider transition-colors duration-200">
+                    class="text-white hover:text-[#c7ccd5] font-medium text-sm uppercase tracking-wider transition-colors duration-200">
                     {{ __('Albums') }}
                 </x-nav-link>
                 <x-nav-link href="{{ route('user.orders.list') }}" :active="request()->routeIs('user.orders.list')" 
-                    class="text-white hover:text-[#D1D5DB] font-medium text-sm uppercase tracking-wider transition-colors duration-200">
+                    class="text-white hover:text-[#c7ccd5] font-medium text-sm uppercase tracking-wider transition-colors duration-200">
                     {{ __('Orders') }}
                 </x-nav-link>
                 <x-nav-link href="{{ route('user.review') }}" :active="request()->routeIs('user.review')" 
-                    class="text-white hover:text-[#D1D5DB] font-medium text-sm uppercase tracking-wider transition-colors duration-200">
+                    class="text-white hover:text-[#c7ccd5] font-medium text-sm uppercase tracking-wider transition-colors duration-200">
                     {{ __('Reviews') }}
                 </x-nav-link>
                 
                 <!-- Cart Link -->
                 <x-nav-link href="{{ route('user.cart') }}" :active="request()->routeIs('user.cart')" 
-                    class="text-white hover:text-[#D1D5DB] font-medium text-sm uppercase tracking-wider transition-colors duration-200 flex items-center">
+                    class="text-white hover:text-[#c7ccd5] font-medium text-sm uppercase tracking-wider transition-colors duration-200 flex items-center">
                     <i class='bx bx-cart mr-1'></i>
-                    <span x-text="cartCount" class="ml-1 bg-[#6366F1] text-white text-xs font-semibold px-2 py-0.5 rounded-full"></span>
+                    <span x-text="cartCount" class="ml-1 bg-[#757474] text-white text-xs font-semibold px-2 py-0.5 rounded-full"></span>
                 </x-nav-link>
 
                 <!-- Teams Dropdown -->
@@ -68,16 +68,19 @@
                             @endif
                         </x-slot>
 
+
                         <x-slot name="content">
                             <div class="bg-[#505355] border border-[#6B7280] rounded-lg shadow-xl py-1">
-                                
+                                <x-dropdown-link href="{{ route('profile.show') }}" class="text-white hover:bg-[#9b9b9bf1] hover:text-white px-4 py-2 text-sm transition-colors duration-150">
+                                    {{ __('Profile') }}
+                                </x-dropdown-link>
 
                                 <!-- Authentication -->
                                 <form method="POST" action="{{ route('logout') }}" x-data>
                                     @csrf
                                     <x-dropdown-link href="{{ route('logout') }}"
                                         @click.prevent="$root.submit();"
-                                        class="text-white hover:bg-[#6B7280] hover:text-white px-4 py-2 text-sm transition-colors duration-150">
+                                        class="text-white hover:bg-[#9b9b9bf1] hover:text-white px-4 py-2 text-sm transition-colors duration-150">
                                         {{ __('Log Out') }}
                                     </x-dropdown-link>
                                 </form>

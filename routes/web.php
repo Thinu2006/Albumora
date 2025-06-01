@@ -30,7 +30,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('guest')->group(function () {
     Route::get('/admin/login', [AdminLoginController::class, 'create'])->name('admin.login');
-    Route::post('/admin/login', [AdminLoginController::class, 'store']);
+    Route::post('/admin/login', [AdminLoginController::class, 'login']);
     Route::post('/admin/logout', [AdminLoginController::class, 'destroy'])->name('admin.logout');
 });
 

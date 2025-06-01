@@ -8,12 +8,13 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminLoginController extends Controller
 {
+    // Web Login Methods
     public function create()
     {
         return view('auth.admin-login');
     }
 
-    public function store(Request $request)
+    public function login(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
@@ -40,6 +41,33 @@ class AdminLoginController extends Controller
         return back()->withErrors(['email' => 'Invalid credentials.']);
     }
 
+    // API Login Method
+    public function apiLogin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        if (Auth::attempt($request->only('email', 'password'))) {
+            $user = Auth::user();
+            if ($user->user_type === 'admin') {
+                $token = $user->createToken('admin-token')->plainTextToken;
+                
+                return response()->json([
+                    'token' => $token,
+                    'user' => $user,
+                    'message' => 'Login successful'
+                ]);
+            }
+
+            Auth::logout();
+            return response()->json(['message' => 'Unauthorized login attempt'], 403);
+        }
+        
+        return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
     public function destroy(Request $request)
     {
         // Delete the current access token
@@ -55,7 +83,11 @@ class AdminLoginController extends Controller
         // Clear the token from cookies
         $cookie = cookie()->forget('auth_token');
         
-        // Return with a script to clear localStorage
+        // Return appropriate response based on request type
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Logged out successfully']);
+        }
+        
         return response()
             ->view('auth.admin-login')
             ->withCookie($cookie)
