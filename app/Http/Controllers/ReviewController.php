@@ -17,7 +17,7 @@ class ReviewController extends Controller
             
             // Manually load customers
            $reviews->getCollection()->transform(function ($review) {
-                $review->customer = $review->customer; // will call the accessor
+                $review->customer = $review->customer; 
                 return $review;
             });
 
@@ -47,7 +47,7 @@ class ReviewController extends Controller
         return response()->json([
             'message' => 'Review submitted successfully',
             'data' => new ReviewResource($review)
-        ]);
+        ], 201); // Explicit 201 status code for creation
     }
 
     public function show(string $id)
