@@ -15,18 +15,22 @@ class UserController extends Controller
      */
     public function index()
     {
-       try {
+        try {
             // Get only users with role 'user' and paginate
             $users = User::where('user_type', 'user')
                         ->latest()
                         ->paginate(10);
             
-            return UserResource::collection($users);
+            // Ensure we always return a collection, even if empty
+            return $users->isEmpty() 
+                ? response()->json(['data' => []])
+                : UserResource::collection($users);
         } catch (\Exception $e) {
             Log::error('Error fetching users: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Error fetching users',
-                'error' => env('APP_DEBUG') ? $e->getMessage() : null
+                'error' => env('APP_DEBUG') ? $e->getMessage() : null,
+                'data' => []
             ], 500);
         }
     }

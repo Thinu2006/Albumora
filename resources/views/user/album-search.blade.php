@@ -9,7 +9,7 @@
             <!-- Hero Section -->
             <div class="text-center mb-12">
                 <h1 class="text-4xl font-extrabold text-[#2d3748] sm:text-5xl mb-4">
-                    Discover Your <span class="text-[#6366F1]">Favorite Music</span>
+                    Discover Your <span class="text-[#6f6f70]">Favorite Music</span>
                 </h1>
                 <p class="mt-3 max-w-2xl mx-auto text-xl text-[#4a5568]">
                     Explore albums from all genres and eras

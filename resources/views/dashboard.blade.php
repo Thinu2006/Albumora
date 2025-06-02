@@ -25,18 +25,18 @@
                         </a>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-20 p-10"> <!-- Changed to exactly 3 columns -->
-                    @foreach($newReleases as $album) <!-- Ensure only 3 albums -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-20 p-10"> 
+                    @foreach($newReleases as $album) 
                     <div class="group relative bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-full flex flex-col">
-                        <div class="relative aspect-square overflow-hidden"> <!-- Perfect square for cover -->
+                        <div class="relative aspect-square overflow-hidden"> 
                             <img src="{{ $album->cover_image_url }}" alt="{{ $album->title }}" 
                                 class="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         </div>
                         
-                        <div class="p-4 flex-grow flex flex-col"> <!-- Compact padding -->
+                        <div class="p-4 flex-grow flex flex-col"> 
                             <h4 class="text-lg font-bold text-gray-800 truncate">{{ $album->title }}</h4>
-                            <p class="text-gray-600 text-sm">{{ $album->artist }}</p> <!-- Smaller text -->
-                            <div class="mt-auto pt-3 flex justify-between items-center"> <!-- Push to bottom -->
+                            <p class="text-gray-600 text-sm">{{ $album->artist }}</p> 
+                            <div class="mt-auto pt-3 flex justify-between items-center"> 
                                 <span class="text-md font-bold text-[#6366F1]">${{ number_format($album->price, 2) }}</span>
                                 <span class="text-xs text-gray-500">{{ $album->release_year }}</span>
                             </div>
@@ -79,7 +79,7 @@
                 </div>
                 
                 <div class="mt-2 text-center">
-                    <a href="{{ route('user.review') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-[#6366F1] hover:bg-[#4F46E5] transition-colors duration-300 shadow-sm">
+                    <a href="{{ route('user.review') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-[#212124] hover:bg-[#484849] transition-colors duration-300 shadow-sm">
                         Write Your Review
                         <i class='bx bx-edit ml-2'></i>
                     </a>
