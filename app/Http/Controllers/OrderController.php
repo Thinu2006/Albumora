@@ -83,7 +83,7 @@ public function store(Request $request)
             // Update album stock if requested
             if ($request->input('update_stock', false)) {
                 \App\Models\Album::where('id', $album['id'])
-                    ->decrement('stock', $album['quantity']);  // Changed from stock_quantity to stock
+                    ->decrement('stock', $album['quantity']); 
             }
         }
 
@@ -157,6 +157,6 @@ public function store(Request $request)
      */
     public function destroy(string $id)
     {
-        // Implement if needed
+        
     }
 }

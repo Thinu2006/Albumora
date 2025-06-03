@@ -28,7 +28,7 @@ class PaymentController extends Controller
             'order_id' => 'required|exists:orders,id',
             'card_type' => 'required|string|in:visa,mastercard,amex,discover',
             'cardholder_name' => 'required|string|max:255',
-            'card_number' => 'required|string|size:16', // simplified validation
+            'card_number' => 'required|string|size:16', 
             'expiration_month' => 'required|string|size:2',
             'expiration_year' => 'required|string|size:4',
             'amount' => 'required|numeric|min:0.01',
@@ -53,7 +53,7 @@ class PaymentController extends Controller
 
     private function validateCardDetails($data)
     {
-        // Very basic validation - in real app use proper Luhn check
+        // Very basic validation 
         $currentYear = date('y');
         $currentMonth = date('m');
         

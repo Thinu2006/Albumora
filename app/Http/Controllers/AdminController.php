@@ -10,9 +10,9 @@ use App\Models\Order;
 
 class AdminController extends Controller
 {
+    // Function to display the admin dashboard
     public function dashboard()
     {
-        // Check if the authenticated user is an admin
         if (Auth :: check() && Auth :: user()->user_type === 'admin') {
             $counts = $this->getCounts();
 
@@ -20,21 +20,19 @@ class AdminController extends Controller
                 'albumCount' => $counts['AlbumCount'],
                 'userCount' => $counts['UserCount'],
                 'orderCount' => $counts['OrderCount'],
-            ]); // Return the admin dashboard view
+            ]);
         }
 
-        // If not an admin, abort with a 403 Forbidden response
         abort(403, 'Unauthorized access');
     }
 
+    // Function to display the albums page for admin
     public function albums()
     {
-        // Check if the authenticated user is an admin
         if (Auth :: check() && Auth :: user()->user_type === 'admin') {
-            return view('admin.albums'); // Return the admin dashboard view
+            return view('admin.albums'); 
         }
 
-        // If not an admin, abort with a 403 Forbidden response
         abort(403, 'Unauthorized access');
     }
 
@@ -47,34 +45,36 @@ class AdminController extends Controller
 
         return compact('AlbumCount', 'UserCount', 'OrderCount');
     }
+
+    // Function to display the order list page for admin
     public function orders()
     {
-        // Check if the authenticated user is an admin
         if (Auth::check() && Auth::user()->user_type === 'admin') {
-            return view('admin.orders'); // Return the admin orders view
+            return view('admin.orders'); 
         }
 
-        // If not an admin, abort with a 403 Forbidden response
         abort(403, 'Unauthorized access');
     }   
+
+    // Function to display the order details page for admin
     public function orderDetail($id)
     {
-        // Check if the authenticated user is an admin
         if (Auth::check() && Auth::user()->user_type === 'admin') {
             return view('admin.order-detail', ['orderId' => $id]);
         }
 
-        // If not an admin, abort with a 403 Forbidden response
         abort(403, 'Unauthorized access');
     }
+
+
+    // Function to display the users page for admin
     public function users()
     {
-        // Check if the authenticated user is an admin
+        
         if (Auth::check() && Auth::user()->user_type === 'admin') {
-            return view('admin.users'); // Return the admin users view
+            return view('admin.users'); 
         }
 
-        // If not an admin, abort with a 403 Forbidden response
         abort(403, 'Unauthorized access');
     }   
 }
