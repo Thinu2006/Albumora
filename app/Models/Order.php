@@ -15,7 +15,6 @@ class Order extends Model
         'total_amount',
     ];
 
-    // Order.php
     public function customer()
     {
         return $this->belongsTo(User::class, 'customer_id')->without('orders');

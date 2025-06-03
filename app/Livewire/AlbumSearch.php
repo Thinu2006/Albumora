@@ -12,16 +12,19 @@ class AlbumSearch extends Component
 {
     use WithPagination;
 
+    // Public properties bound to the search input, genre filter, and pagination
     public $search = '';
     public $genreFilter = '';
     public $perPage = 12;
-    
+
+    // Define how query parameters are managed in the URL
     protected $queryString = [
         'search' => ['except' => '', 'as' => 'q'],
         'genreFilter' => ['except' => '', 'as' => 'genre'],
         'page' => ['except' => 1],
     ];
 
+    // Initialize the component
     public function mount()
     {
         Log::debug('Mounting component', [
@@ -30,16 +33,19 @@ class AlbumSearch extends Component
         ]);
     }
 
+    // Reset pagination when the search input changes
     public function updatingSearch()
     {
         $this->resetPage();
     }
 
+    // Reset pagination when the genre filter changes
     public function updatingGenreFilter()
     {
         $this->resetPage();
     }
 
+    // Main method: builds the filtered query and returns the view
     public function render()
     {
         Log::debug('Rendering component', [
@@ -47,6 +53,7 @@ class AlbumSearch extends Component
             'genreFilter' => $this->genreFilter
         ]);
 
+        // Build the query dynamically based on search and genre filter
         $query = Album::with(['genres', 'creator'])
             ->when($this->search, function ($query) {
                 $query->where(function($q) {
@@ -61,13 +68,16 @@ class AlbumSearch extends Component
             })
             ->latest();
 
+        // Paginate the results
         $albums = $query->paginate($this->perPage);
+
+        // Fetch all genres for the dropdown filter
         $genres = Genre::all();
 
+        // Return the component view with data
         return view('livewire.album-search', [
             'albums' => $albums,
             'genres' => $genres,
         ]);
     }
-
 }

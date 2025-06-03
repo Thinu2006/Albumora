@@ -26,6 +26,8 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::apiResource('genres', GenreController::class)->only(['index']);
     Route::apiResource('users', UserController::class)->only(['index', 'destroy']);
     Route::apiResource('orders', OrderController::class)->only(['index', 'store','show', 'update']);
+    Route::apiResource('payments', PaymentController::class)->only(['index', 'store']);
+    Route::apiResource('shipments', ShipmentController::class)->only(['index', 'store', 'show']);
 
     Route::apiResource('reviews', ReviewController::class);
     
